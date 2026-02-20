@@ -7,4 +7,8 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Url> Urls {get; set;}
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+    }
 }

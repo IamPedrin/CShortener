@@ -7,9 +7,8 @@ public class Url
     public int AccessCount { get; private set; }
 
 
-    public Url(long id, string originalUrl, string shortCode)
+    public Url(string originalUrl, string shortCode)
     {
-        Id = id;
         OriginalUrl = originalUrl;
         ShortCode = shortCode;
         CreatedAt = DateTime.UtcNow;
