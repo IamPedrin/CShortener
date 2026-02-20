@@ -3,16 +3,17 @@ using NanoidDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//A
+//Configuração do banco de dados usando Entity Framework Core e Npgsql para PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 var app = builder.Build();
 
 app.MapGet("/", () => "CShortener!");
 
 
-//
+//Endpoint para gerar um um link encurtado
 app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db) =>
 {
     //Usando Nanoid para gerar o shortcode aleatório
@@ -25,11 +26,13 @@ app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db) =>
     db.Add(urlObj);
     db.SaveChanges();
 
-    return Results.Ok(new { url = $"site.com/{urlObj.ShortCode}" });
+    return Results.Ok(new { url = $"{urlObj.ShortCode}" });
 });
 
+//Endpoint para redirecionar o usuário para a URL original
 app.MapGet("/{shortCode}", (string shortCode, AppDbContext db) =>
 {   
+    //Busca no banco de dados pelo shortcode
     var urlDb = db.Urls.FirstOrDefault(u => u.ShortCode == shortCode);
 
     if(urlDb == null)
@@ -44,6 +47,7 @@ app.MapGet("/{shortCode}", (string shortCode, AppDbContext db) =>
     }
 });
 
+//Endpoint para obter as estatísticas de um link encurtado
 app.MapGet("/api/shortener/{shortCode}/stats", (string shortCode, AppDbContext db) =>
 {
     var urlDb = db.Urls.FirstOrDefault(u => u.ShortCode == shortCode);

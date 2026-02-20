@@ -15,6 +15,7 @@ public class Url
         AccessCount = 0;
     }
 
+    //Método para incrementar o contador de acessos
     public void NewAccess()
     {
         AccessCount++;
@@ -22,6 +23,9 @@ public class Url
 
 }
 
+//Record para receber a URL original na requisição de criação do link encurtado
+//Difrença entre class e record: Record garante que os dados nao sejam alterados depois de criados, ou seja, são imutáveis. 
+//Já as classes permitem que os dados sejam alterados depois de criados.
 public record CreateUrlRequest
 {
     public required string OriginalUrl { get; set; }
