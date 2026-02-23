@@ -1,11 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using NanoidDotNet;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Configuração do banco de dados usando Entity Framework Core e Npgsql para PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379")
+);
 
 
 var app = builder.Build();
@@ -21,7 +25,7 @@ app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db, HttpCo
     !Uri.TryCreate(request.OriginalUrl, UriKind.Absolute, out var validateUri) ||
     (validateUri.Scheme != Uri.UriSchemeHttp && validateUri.Scheme != Uri.UriSchemeHttps))
     {
-        return Results.BadRequest(new {erro = "A URL fornecida é inválida"});
+        return Results.BadRequest(new { erro = "A URL fornecida é inválida" });
     }
 
     //Usando Nanoid para gerar o shortcode aleatório
@@ -36,45 +40,64 @@ app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db, HttpCo
     var urlBase = $"{context.Request.Scheme}://{context.Request.Host}";
     var urlCompleta = $"{urlBase}/{urlObj.ShortCode}";
 
-    return Results.Created($"/api/shortener/{urlObj.ShortCode}/stats", new { url = urlCompleta});
+    return Results.Created($"/api/shortener/{urlObj.ShortCode}/stats", new { url = urlCompleta });
 });
 
 //Endpoint para redirecionar o usuário para a URL original
-app.MapGet("/{shortCode}", (string shortCode, AppDbContext db) =>
-{   
+app.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
+{
+    //Leitura do cache
+    var dbRedis = redis.GetDatabase();
+
+    //Salvando a quantidade de acessos pelo redis
+    await dbRedis.StringIncrementAsync($"clicks: {shortCode}");
+    var cachedUrl = await dbRedis.StringGetAsync(shortCode);
+
+    //Caso encontre, redireciona. Se não, busca no banco de dados
+    if (cachedUrl.HasValue)
+    {
+        return Results.Redirect(cachedUrl.ToString());
+    }
+
     //Busca no banco de dados pelo shortcode
     var urlDb = db.Urls.FirstOrDefault(u => u.ShortCode == shortCode);
 
-    if(urlDb == null)
+    if (urlDb == null)
     {
-        return Results.NotFound(new {erro = "Link não encontrado!"});
+        return Results.NotFound(new { erro = "Link não encontrado!" });
     }
-    else
-    {
-        urlDb.NewAccess();
-        db.SaveChanges();
-        return Results.Redirect(urlDb.OriginalUrl);
-    }
+
+    //Salva no Redis por uma hora quando encontrado no banco
+    await dbRedis.StringSetAsync(shortCode, urlDb.OriginalUrl, TimeSpan.FromHours(1));
+
+    return Results.Redirect(urlDb.OriginalUrl);
 });
 
 //Endpoint para obter as estatísticas de um link encurtado
-app.MapGet("/api/shortener/{shortCode}/stats", (string shortCode, AppDbContext db) =>
+app.MapGet("/api/shortener/{shortCode}/stats", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
 {
     var urlDb = db.Urls.FirstOrDefault(u => u.ShortCode == shortCode);
 
-    if(urlDb == null)
+    if (urlDb == null)
     {
-        return Results.NotFound(new {erro = "Link não encontrado!"});
+        return Results.NotFound(new { erro = "Link não encontrado!" });
     }
-    else
+
+    var dbRedis = redis.GetDatabase();
+    var redisClicks = await dbRedis.StringGetAsync($"clicks: {shortCode}");
+    long totalAcess =  urlDb.AccessCount;
+    if(redisClicks.HasValue)
     {
-        return Results.Ok(new
-        {
-            urlDb.OriginalUrl,
-            urlDb.AccessCount,
-            urlDb.CreatedAt
-        });
+        totalAcess += (long)redisClicks;
     }
+
+    return Results.Ok(new
+    {
+        urlDb.OriginalUrl,
+        AccessCount = totalAcess,
+        urlDb.CreatedAt
+    });
+
 });
 
 app.Run();
