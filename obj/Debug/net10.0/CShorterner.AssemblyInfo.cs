@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CShorterner")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c8c79d5af87d665bb02ec86a5d4b5c75e5898f83")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d675c501f160a132369d174a8d0eac747d644af5")]
 [assembly: System.Reflection.AssemblyProductAttribute("CShorterner")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CShorterner")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

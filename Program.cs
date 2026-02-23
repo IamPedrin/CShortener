@@ -14,11 +14,18 @@ app.MapGet("/", () => "CShortener!");
 
 
 //Endpoint para gerar um um link encurtado
-app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db) =>
+app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db, HttpContext context) =>
 {
+    //Validacao da URL original
+    if (string.IsNullOrWhiteSpace(request.OriginalUrl) ||
+    !Uri.TryCreate(request.OriginalUrl, UriKind.Absolute, out var validateUri) ||
+    (validateUri.Scheme != Uri.UriSchemeHttp && validateUri.Scheme != Uri.UriSchemeHttps))
+    {
+        return Results.BadRequest(new {erro = "A URL fornecida é inválida"});
+    }
+
     //Usando Nanoid para gerar o shortcode aleatório
     var newShortCode = Nanoid.Generate(size: 7);
-
     //Criação do objeto URL
     var urlObj = new Url(request.OriginalUrl, newShortCode);
 
@@ -26,7 +33,10 @@ app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db) =>
     db.Add(urlObj);
     db.SaveChanges();
 
-    return Results.Ok(new { url = $"{urlObj.ShortCode}" });
+    var urlBase = $"{context.Request.Scheme}://{context.Request.Host}";
+    var urlCompleta = $"{urlBase}/{urlObj.ShortCode}";
+
+    return Results.Created($"/api/shortener/{urlObj.ShortCode}/stats", new { url = urlCompleta});
 });
 
 //Endpoint para redirecionar o usuário para a URL original
