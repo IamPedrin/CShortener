@@ -7,9 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 //Configuração do banco de dados usando Entity Framework Core e Npgsql para PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+//Configuraćão do Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect("localhost:6379")
-);
+    ConnectionMultiplexer.Connect("localhost:6379"));
+//Configuraćão do servico de contagem de acessos em segundo plano
+builder.Services.AddHostedService<SyncAccessCountService>();
 
 
 var app = builder.Build();
@@ -50,7 +52,7 @@ app.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnection
     var dbRedis = redis.GetDatabase();
 
     //Salvando a quantidade de acessos pelo redis
-    await dbRedis.StringIncrementAsync($"clicks: {shortCode}");
+    await dbRedis.StringIncrementAsync($"clicks:{shortCode}");
     var cachedUrl = await dbRedis.StringGetAsync(shortCode);
 
     //Caso encontre, redireciona. Se não, busca no banco de dados
@@ -84,17 +86,17 @@ app.MapGet("/api/shortener/{shortCode}/stats", async (string shortCode, AppDbCon
     }
 
     var dbRedis = redis.GetDatabase();
-    var redisClicks = await dbRedis.StringGetAsync($"clicks: {shortCode}");
-    long totalAcess =  urlDb.AccessCount;
-    if(redisClicks.HasValue)
+    var redisClicks = await dbRedis.StringGetAsync($"clicks:{shortCode}");
+    long totalClicks = urlDb.AccessCount;
+    if (redisClicks.HasValue)
     {
-        totalAcess += (long)redisClicks;
+        totalClicks += (long)redisClicks;
     }
 
     return Results.Ok(new
     {
         urlDb.OriginalUrl,
-        AccessCount = totalAcess,
+        AccessCount = totalClicks,
         urlDb.CreatedAt
     });
 

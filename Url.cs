@@ -4,7 +4,7 @@ public class Url
     public string OriginalUrl { get; private set; }
     public string ShortCode { get; private set; }
     public DateTime CreatedAt { get; private set; }
-    public int AccessCount { get; private set; }
+    public int AccessCount { get; set; }
 
 
     public Url(string originalUrl, string shortCode)
