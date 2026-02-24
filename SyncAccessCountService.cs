@@ -44,7 +44,7 @@ public class SyncAccessCountService : BackgroundService
                 }
                 db.SaveChanges();
             }
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
         }
     }
 }

@@ -3,18 +3,25 @@ using NanoidDotNet;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+var redisConnectionString = builder.Configuration["RedisConnection"] ?? "localhost:6379";
 
 //Configuração do banco de dados usando Entity Framework Core e Npgsql para PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 //Configuraćão do Redis
 builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect("localhost:6379"));
+    ConnectionMultiplexer.Connect(redisConnectionString));
 //Configuraćão do servico de contagem de acessos em segundo plano
 builder.Services.AddHostedService<SyncAccessCountService>();
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.MapGet("/", () => "CShortener!");
 

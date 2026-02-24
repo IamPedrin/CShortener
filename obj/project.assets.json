@@ -2294,9 +2294,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/mastermind/dev/CShorterner/CShorterner.csproj",
-      "projectName": "CShorterner",
-      "projectPath": "/home/mastermind/dev/CShorterner/CShorterner.csproj",
+      "projectUniqueName": "/home/mastermind/dev/CShorterner/CShortener.csproj",
+      "projectName": "CShortener",
+      "projectPath": "/home/mastermind/dev/CShorterner/CShortener.csproj",
       "packagesPath": "/home/mastermind/.nuget/packages/",
       "outputPath": "/home/mastermind/dev/CShorterner/obj/",
       "projectStyle": "PackageReference",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "eYjUdPES+L4=",
+  "dgSpecHash": "e3VTaCUs/a0=",
   "success": true,
-  "projectFilePath": "/home/mastermind/dev/CShorterner/CShorterner.csproj",
+  "projectFilePath": "/home/mastermind/dev/CShorterner/CShortener.csproj",
   "expectedPackageFiles": [
     "/home/mastermind/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/home/mastermind/.nuget/packages/microsoft.build.framework/18.0.2/microsoft.build.framework.18.0.2.nupkg.sha512",

@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cshortener-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cshortener_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  
+  redis:
+    image: redis:alpine
+    container_name: cshortener-redis
+    ports:
+      - "6379:6379"
+  
+  api:
+    build: .
+    container_name: cshortener-api
+    ports:
+      - "5000:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=cshortener_db;Username=postgres;Password=postgres
+      - RedisConnection=redis:6379
+
+volumes:
+  pgdata: 
