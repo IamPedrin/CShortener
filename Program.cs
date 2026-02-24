@@ -23,11 +23,10 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-app.MapGet("/", () => "CShortener!");
-
+var api = app.MapGroup("/api/v1");
 
 //Endpoint para gerar um um link encurtado
-app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db, HttpContext context) =>
+api.MapPost("/shorten", (CreateUrlRequest request, AppDbContext db, HttpContext context) =>
 {
     //Validacao da URL original
     if (string.IsNullOrWhiteSpace(request.OriginalUrl) ||
@@ -53,7 +52,7 @@ app.MapPost("/api/shortener", (CreateUrlRequest request, AppDbContext db, HttpCo
 });
 
 //Endpoint para redirecionar o usuário para a URL original
-app.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
+api.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
 {
     //Leitura do cache
     var dbRedis = redis.GetDatabase();
@@ -83,7 +82,7 @@ app.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnection
 });
 
 //Endpoint para obter as estatísticas de um link encurtado
-app.MapGet("/api/shortener/{shortCode}/stats", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
+api.MapGet("/{shortCode}/stats", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
 {
     var urlDb = db.Urls.FirstOrDefault(u => u.ShortCode == shortCode);
 
