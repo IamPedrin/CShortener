@@ -52,7 +52,7 @@ api.MapPost("/shorten", (CreateUrlRequest request, AppDbContext db, HttpContext 
 });
 
 //Endpoint para redirecionar o usuário para a URL original
-api.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
+app.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
 {
     //Leitura do cache
     var dbRedis = redis.GetDatabase();
