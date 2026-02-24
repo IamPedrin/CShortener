@@ -82,7 +82,7 @@ app.MapGet("/{shortCode}", async (string shortCode, AppDbContext db, IConnection
 });
 
 //Endpoint para obter as estatísticas de um link encurtado
-api.MapGet("/{shortCode}/stats", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
+app.MapGet("/{shortCode}/stats", async (string shortCode, AppDbContext db, IConnectionMultiplexer redis) =>
 {
     var urlDb = db.Urls.FirstOrDefault(u => u.ShortCode == shortCode);
 
