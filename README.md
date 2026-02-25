@@ -1,8 +1,8 @@
-# 🔗 CShortener - URL Shortener API
+# CShortener - URL Shortener API
 
 O **CShortener** é uma Web API para encurtamento de URLs. Este projeto foi desenvolvido com o objetivo de colocar em prática conceitos de arquitetura, uso de cache em memória e infraestrutura conteinerizada, focando em performance e organização do código.
 
-## 🚀 Tecnologias e Arquitetura
+## Tecnologias e Arquitetura
 
 * **.NET 10 (C#) / Minimal APIs:** Estrutura leve e otimizada para alta performance.
 * **PostgreSQL:** Persistência de dados relacionais.
@@ -10,7 +10,7 @@ O **CShortener** é uma Web API para encurtamento de URLs. Este projeto foi dese
 * **Entity Framework Core (EF Core):** ORM para mapeamento de dados e migrações.
 * **Docker & Docker Compose:** Orquestração e padronização do ambiente local.
 
-## 🧠 Diferenciais Arquiteturais
+## Diferenciais Arquiteturais
 
 Para lidar com a contagem de cliques sem sobrecarregar o banco de dados principal, o projeto implementa as seguintes soluções:
 
@@ -37,7 +37,7 @@ A API estará disponível em: `http://localhost:5000`
 
 **Nota:** Para acompanhar o `BackgroundService` sincronizando os dados do Redis com o PostgreSQL em tempo real, você pode verificar os logs do contêiner da API com o comando `docker logs cshortener-api -f`.
 
-## 🛣️ Endpoints
+## Endpoints
 
 Para manter a organização e permitir futuras evoluções, as rotas de criação utilizam versionamento, enquanto o redirecionamento fica na raiz para manter os links os menores possíveis.
 
